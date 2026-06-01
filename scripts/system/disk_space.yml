@@ -5,7 +5,7 @@ os_target: all
 parameters: []
 script: |
   Get-PSDrive -PSProvider FileSystem |
-    Select-Object Name,
+    Select-Object @{N='Drive';E={"$($_.Name):"}},
       @{N='Used(GB)';E={[math]::Round($_.Used/1GB,2)}},
       @{N='Free(GB)';E={[math]::Round($_.Free/1GB,2)}},
       @{N='Total(GB)';E={[math]::Round(($_.Used+$_.Free)/1GB,2)}} |
