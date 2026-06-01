@@ -111,9 +111,8 @@ jobs:
             -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
             -Name "LocalAccountTokenFilterPolicy" `
             -Value 1 -PropertyType DWORD -Force
-          $password = ConvertTo-SecureString "WinRMTest123!" -AsPlainText -Force
-          New-LocalUser -Name "winrmtest" -Password $password -PasswordNeverExpires
-          Add-LocalGroupMember -Group "Administrators" -Member "winrmtest"
+          net user winrmtest "WinRMTest123!" /add
+          net localgroup Administrators winrmtest /add
           Restart-Service WinRM
           Write-Host "WinRM ready on localhost:5985"
 
