@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+
+jobs:
+
+  # ── Job 1: build the Docker image and smoke-test all routes ────────────────
+  docker-build:
+    name: Docker Build & Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t winrm-admin:test .
+
+      - name: Start container
+        run: |
+          docker run -d --name winrm-admin-test \
+            -p 5000:5000 \
+            -e VM_HOSTS=test:127.0.0.1:server2019 \
+            -e WINRM_USERNAME=test \
+            -e WINRM_PASSWORD=test \
+            -e WINRM_PORT=5985 \
+            -e WINRM_TRANSPORT=ntlm \
+            winrm-admin:test
+
+      - name: Wait for app startup
+        run: sleep 5
+
+      - name: Smoke test — GET /
+        run: curl -sf http://localhost:5000/ -o /dev/null
+
+      - name: Smoke test — GET /scripts
+        run: curl -sf http://localhost:5000/scripts -o /dev/null
+
+      - name: Smoke test — GET /history
+        run: curl -sf http://localhost:5000/history -o /dev/null
+
+      - name: Smoke test — GET /api/vm/test/status
+        run: |
+          response=$(curl -sf http://localhost:5000/api/vm/test/status)
+          echo "Response: $response"
+          echo "$response" | grep -q '"connected"'
+
+      - name: Verify all scripts load inside container
+        run: |
+          expected=$(find scripts/ -name "*.yml" | wc -l | tr -d ' ')
+          docker exec winrm-admin-test python -c "
+          from script_loader import load_all_scripts
+          t = sum(len(v) for v in load_all_scripts().values())
+          assert t == $expected, f'Expected $expected scripts, got {t}'
+          print(f'OK: {t} scripts loaded')
+          "
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker logs winrm-admin-test
+
+      - name: Cleanup
+        if: always()
+        run: docker stop winrm-admin-test && docker rm winrm-admin-test
+
+  # ── Job 2: real WinRM integration tests on a Windows runner ───────────────
+  integration:
+    name: Windows Integration Tests
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Configure WinRM on localhost
+        shell: pwsh
+        run: |
+          Enable-PSRemoting -Force -SkipNetworkProfileCheck
+          Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+          Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
+          Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
+          # Required: allow local accounts to authenticate with a full admin token
+          # over loopback WinRM connections (UAC token filtering blocks this by default)
+          New-ItemProperty `
+            -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
+            -Name "LocalAccountTokenFilterPolicy" `
+            -Value 1 -PropertyType DWORD -Force
+          $password = ConvertTo-SecureString "WinRMTest123!" -AsPlainText -Force
+          New-LocalUser -Name "winrmtest" -Password $password -PasswordNeverExpires
+          Add-LocalGroupMember -Group "Administrators" -Member "winrmtest"
+          Restart-Service WinRM
+          Write-Host "WinRM ready on localhost:5985"
+
+      - name: Verify WinRM connectivity before tests
+        shell: pwsh
+        run: |
+          $password = ConvertTo-SecureString "WinRMTest123!" -AsPlainText -Force
+          $cred = New-Object System.Management.Automation.PSCredential("winrmtest", $password)
+          $result = Invoke-Command `
+            -ComputerName localhost `
+            -Credential $cred `
+            -Authentication Ntlm `
+            -ScriptBlock { "ok" } `
+            -ErrorAction Stop
+          if ($result -ne "ok") { throw "WinRM connectivity check failed" }
+          Write-Host "WinRM connectivity verified"
+
+      - name: Run integration tests
+        timeout-minutes: 10
+        env:
+          VM_HOSTS: "localhost:127.0.0.1:server2019,win11vm:127.0.0.1:win11"
+          WINRM_USERNAME: winrmtest
+          WINRM_PASSWORD: "WinRMTest123!"
+          WINRM_PORT: "5985"
+          WINRM_TRANSPORT: ntlm
+        run: pytest tests/integration/ -v --tb=short
