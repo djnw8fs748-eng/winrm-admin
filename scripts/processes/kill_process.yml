@@ -1,0 +1,18 @@
+name: Kill Process
+description: Kills all running instances of a process by name.
+category: processes
+os_target: all
+parameters:
+  - name: process_name
+    label: Process Name
+    type: text
+    required: true
+    placeholder: e.g. notepad, chrome
+script: |
+  $procs = Get-Process -Name {{ process_name }} -ErrorAction SilentlyContinue
+  if ($procs) {
+    $procs | Stop-Process -Force
+    Write-Output "Killed $($procs.Count) instance(s) of {{ process_name }}."
+  } else {
+    Write-Output "No running instances of {{ process_name }} found."
+  }

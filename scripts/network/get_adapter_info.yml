@@ -1,0 +1,15 @@
+name: Get Network Adapter Info
+description: Lists all active network adapters with their IP addresses and link speed.
+category: network
+os_target: all
+parameters: []
+script: |
+  Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | ForEach-Object {
+    $ip = (Get-NetIPAddress -InterfaceIndex $_.ifIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue).IPAddress
+    [PSCustomObject]@{
+      Name      = $_.Name
+      Status    = $_.Status
+      LinkSpeed = $_.LinkSpeed
+      IPAddress = $ip
+    }
+  } | Format-Table -AutoSize | Out-String

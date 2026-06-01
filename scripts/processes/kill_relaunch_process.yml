@@ -1,0 +1,26 @@
+name: Kill and Relaunch Process
+description: Kills all instances of a process then relaunches the executable from the given path.
+category: processes
+os_target: all
+parameters:
+  - name: process_name
+    label: Process Name
+    type: text
+    required: true
+    placeholder: e.g. notepad
+  - name: exe_path
+    label: Executable Path
+    type: text
+    required: true
+    placeholder: e.g. C:\Windows\notepad.exe
+script: |
+  $procs = Get-Process -Name {{ process_name }} -ErrorAction SilentlyContinue
+  if ($procs) {
+    $procs | Stop-Process -Force
+    Write-Output "Killed $($procs.Count) instance(s) of {{ process_name }}."
+  } else {
+    Write-Output "No running instances found, launching fresh."
+  }
+  Start-Sleep -Seconds 1
+  Start-Process -FilePath {{ exe_path }}
+  Write-Output "Launched: {{ exe_path }}"

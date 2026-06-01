@@ -1,0 +1,14 @@
+name: Recycle IIS App Pool
+description: Recycles a named IIS application pool to clear its worker process.
+category: iis
+os_target: server2019
+parameters:
+  - name: pool_name
+    label: App Pool Name
+    type: text
+    required: true
+    placeholder: e.g. DefaultAppPool
+script: |
+  Import-Module WebAdministration
+  Restart-WebAppPool -Name {{ pool_name }}
+  Write-Output "App pool {{ pool_name }} recycled."

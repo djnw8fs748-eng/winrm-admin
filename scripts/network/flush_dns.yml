@@ -1,0 +1,8 @@
+name: Flush DNS Cache
+description: Clears the local DNS resolver cache.
+category: network
+os_target: all
+parameters: []
+script: |
+  Clear-DnsClientCache
+  Write-Output "DNS cache flushed successfully."

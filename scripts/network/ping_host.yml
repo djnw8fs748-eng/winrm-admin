@@ -1,0 +1,20 @@
+name: Ping Host
+description: Pings a hostname or IP address and reports round-trip time.
+category: network
+os_target: all
+parameters:
+  - name: target
+    label: Hostname or IP
+    type: text
+    required: true
+    placeholder: e.g. 8.8.8.8 or google.com
+  - name: count
+    label: Ping Count
+    type: number
+    required: false
+    default: 4
+script: |
+  Test-Connection -ComputerName {{ target }} -Count {{ count }} |
+    Select-Object Address, ResponseTime, StatusCode |
+    Format-Table -AutoSize |
+    Out-String

@@ -1,0 +1,15 @@
+name: Stop IIS App Pool
+description: Stops a named IIS application pool.
+category: iis
+os_target: server2019
+parameters:
+  - name: pool_name
+    label: App Pool Name
+    type: text
+    required: true
+    placeholder: e.g. DefaultAppPool
+script: |
+  Import-Module WebAdministration
+  Stop-WebAppPool -Name {{ pool_name }}
+  $state = (Get-WebAppPoolState -Name {{ pool_name }}).Value
+  Write-Output "App pool state: $state"

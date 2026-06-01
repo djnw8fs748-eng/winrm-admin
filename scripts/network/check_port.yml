@@ -1,0 +1,20 @@
+name: Check Port Open
+description: Tests whether a TCP port is reachable on a given host.
+category: network
+os_target: all
+parameters:
+  - name: target
+    label: Hostname or IP
+    type: text
+    required: true
+    placeholder: e.g. 192.168.1.1
+  - name: port
+    label: Port
+    type: number
+    required: true
+    placeholder: e.g. 443
+script: |
+  $result = Test-NetConnection -ComputerName {{ target }} -Port {{ port }}
+  Write-Output "Host: $($result.ComputerName)"
+  Write-Output "Port: {{ port }}"
+  Write-Output "TCP Test Succeeded: $($result.TcpTestSucceeded)"

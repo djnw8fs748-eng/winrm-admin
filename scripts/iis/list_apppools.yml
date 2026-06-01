@@ -1,0 +1,11 @@
+name: List IIS App Pools
+description: Lists all IIS application pools and their current state.
+category: iis
+os_target: server2019
+parameters: []
+script: |
+  Import-Module WebAdministration
+  Get-ChildItem IIS:\AppPools |
+    Select-Object Name, State, ManagedRuntimeVersion, Enable32BitAppOnWin64 |
+    Format-Table -AutoSize |
+    Out-String

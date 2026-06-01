@@ -1,0 +1,19 @@
+name: List Processes
+description: Lists running processes, optionally filtered by name. Leave filter blank to list all.
+category: processes
+os_target: all
+parameters:
+  - name: name_filter
+    label: Name Filter (optional)
+    type: text
+    required: false
+    default: "*"
+    placeholder: e.g. sql (leave blank for all)
+script: |
+  Get-Process -Name {{ name_filter }} -ErrorAction SilentlyContinue |
+    Sort-Object CPU -Descending |
+    Select-Object -First 50 Name, Id,
+      @{N='CPU(s)';E={[math]::Round($_.CPU,1)}},
+      @{N='Mem(MB)';E={[math]::Round($_.WorkingSet/1MB,1)}} |
+    Format-Table -AutoSize |
+    Out-String
