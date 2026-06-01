@@ -42,9 +42,10 @@ def test_load_config_exits_on_missing_vm_hosts(monkeypatch):
     monkeypatch.setenv("WINRM_USERNAME", "Admin")
     monkeypatch.setenv("WINRM_PASSWORD", "pass")
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc_info:
         from config import load_config
         load_config()
+    assert exc_info.value.code == 1
 
 
 def test_load_config_exits_on_missing_credentials(monkeypatch):
@@ -52,9 +53,10 @@ def test_load_config_exits_on_missing_credentials(monkeypatch):
     monkeypatch.delenv("WINRM_USERNAME", raising=False)
     monkeypatch.delenv("WINRM_PASSWORD", raising=False)
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc_info:
         from config import load_config
         load_config()
+    assert exc_info.value.code == 1
 
 
 def test_load_config_exits_on_malformed_vm_entry(monkeypatch):
@@ -62,6 +64,20 @@ def test_load_config_exits_on_malformed_vm_entry(monkeypatch):
     monkeypatch.setenv("WINRM_USERNAME", "Admin")
     monkeypatch.setenv("WINRM_PASSWORD", "pass")
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as exc_info:
         from config import load_config
         load_config()
+    assert exc_info.value.code == 1
+
+
+def test_load_config_exits_on_invalid_port(monkeypatch):
+    monkeypatch.setenv("VM_HOSTS", "dc01:192.168.1.10:server2019")
+    monkeypatch.setenv("WINRM_USERNAME", "Admin")
+    monkeypatch.setenv("WINRM_PASSWORD", "pass")
+    monkeypatch.setenv("WINRM_PORT", "notanint")
+
+    with pytest.raises(SystemExit) as exc_info:
+        import importlib, config as config_module
+        importlib.reload(config_module)
+        config_module.load_config()
+    assert exc_info.value.code == 1

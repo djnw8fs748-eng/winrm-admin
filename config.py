@@ -24,8 +24,15 @@ def load_config() -> Config:
     vm_hosts = os.getenv("VM_HOSTS")
     username = os.getenv("WINRM_USERNAME")
     password = os.getenv("WINRM_PASSWORD")
-    port = int(os.getenv("WINRM_PORT", "5985"))
+    port_str = os.getenv("WINRM_PORT", "5985")
+    try:
+        port = int(port_str)
+    except ValueError:
+        print(f"ERROR: WINRM_PORT must be an integer, got: {port_str!r}", file=sys.stderr)
+        sys.exit(1)
     transport = os.getenv("WINRM_TRANSPORT", "ntlm")
+    if not transport:
+        transport = "ntlm"
 
     if not vm_hosts:
         missing.append("VM_HOSTS")
@@ -47,6 +54,6 @@ def load_config() -> Config:
                 file=sys.stderr,
             )
             sys.exit(1)
-        vms.append(VM(name=parts[0], ip=parts[1], os_tag=parts[2]))
+        vms.append(VM(name=parts[0].strip(), ip=parts[1].strip(), os_tag=parts[2].strip()))
 
     return Config(vms=vms, username=username, password=password, port=port, transport=transport)
