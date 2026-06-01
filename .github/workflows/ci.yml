@@ -103,6 +103,7 @@ jobs:
         run: |
           Enable-PSRemoting -Force -SkipNetworkProfileCheck
           Set-Item WSMan:\localhost\Service\Auth\Basic -Value $true
+          Set-Item WSMan:\localhost\Service\Auth\Negotiate -Value $true
           Set-Item WSMan:\localhost\Service\AllowUnencrypted -Value $true
           Set-Item WSMan:\localhost\Client\TrustedHosts -Value "*" -Force
           # Required: allow local accounts to authenticate with a full admin token
@@ -122,21 +123,19 @@ jobs:
           New-LocalUser -Name "winrmtest" -Password $password -PasswordNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "winrmtest"
           Restart-Service WinRM
+          Start-Sleep -Seconds 5
           Write-Host "WinRM ready on localhost:5985"
 
       - name: Verify WinRM connectivity before tests
-        shell: pwsh
         run: |
-          $password = ConvertTo-SecureString "WinRMTest@Password123!" -AsPlainText -Force
-          $cred = New-Object System.Management.Automation.PSCredential("winrmtest", $password)
-          $result = Invoke-Command `
-            -ComputerName localhost `
-            -Credential $cred `
-            -Authentication Negotiate `
-            -ScriptBlock { "ok" } `
-            -ErrorAction Stop
-          if ($result -ne "ok") { throw "WinRM connectivity check failed" }
-          Write-Host "WinRM connectivity verified"
+          python -c "
+          import winrm
+          s = winrm.Session('http://127.0.0.1:5985/wsman', auth=('winrmtest', 'WinRMTest@Password123!'), transport='ntlm')
+          r = s.run_ps('Write-Output ok')
+          out = r.std_out.decode().strip()
+          assert out == 'ok', f'Expected ok, got: {out!r}'
+          print('WinRM connectivity verified')
+          "
 
       - name: Run integration tests
         timeout-minutes: 10
