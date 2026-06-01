@@ -132,7 +132,7 @@ jobs:
           $result = Invoke-Command `
             -ComputerName localhost `
             -Credential $cred `
-            -Authentication Ntlm `
+            -Authentication Negotiate `
             -ScriptBlock { "ok" } `
             -ErrorAction Stop
           if ($result -ne "ok") { throw "WinRM connectivity check failed" }
