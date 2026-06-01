@@ -1,0 +1,14 @@
+name: Stop Service
+description: Stops a named Windows service and confirms it has stopped.
+category: services
+os_target: all
+parameters:
+  - name: service_name
+    label: Service Name
+    type: text
+    required: true
+    placeholder: e.g. Spooler
+script: |
+  Stop-Service -Name {{ service_name }} -Force -ErrorAction Stop
+  $svc = Get-Service -Name {{ service_name }}
+  Write-Output "Status: $($svc.Status)"

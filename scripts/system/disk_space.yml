@@ -1,0 +1,13 @@
+name: Get Disk Space
+description: Reports free and total disk space for all local fixed drives.
+category: system
+os_target: all
+parameters: []
+script: |
+  Get-PSDrive -PSProvider FileSystem |
+    Select-Object Name,
+      @{N='Used(GB)';E={[math]::Round($_.Used/1GB,2)}},
+      @{N='Free(GB)';E={[math]::Round($_.Free/1GB,2)}},
+      @{N='Total(GB)';E={[math]::Round(($_.Used+$_.Free)/1GB,2)}} |
+    Format-Table -AutoSize |
+    Out-String

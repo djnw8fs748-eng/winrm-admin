@@ -1,0 +1,16 @@
+name: Restart Service
+description: Stops and restarts a named Windows service and reports its final state.
+category: services
+os_target: all
+parameters:
+  - name: service_name
+    label: Service Name
+    type: text
+    required: true
+    placeholder: e.g. Spooler, W32Time, wuauserv
+script: |
+  $svc = Get-Service -Name {{ service_name }} -ErrorAction Stop
+  Restart-Service -Name {{ service_name }} -Force
+  Start-Sleep -Seconds 2
+  $svc.Refresh()
+  Write-Output "Status: $($svc.Status)"

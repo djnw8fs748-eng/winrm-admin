@@ -1,0 +1,15 @@
+name: Get Recent Event Log Errors
+description: Retrieves the most recent error and warning events from the System event log.
+category: system
+os_target: all
+parameters:
+  - name: count
+    label: Number of Events
+    type: number
+    required: false
+    default: 20
+script: |
+  Get-EventLog -LogName System -EntryType Error,Warning -Newest {{ count }} |
+    Select-Object TimeGenerated, EntryType, Source, Message |
+    Format-List |
+    Out-String

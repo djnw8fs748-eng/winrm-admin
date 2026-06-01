@@ -1,0 +1,10 @@
+name: Clear Windows Update Cache
+description: Stops Windows Update services, clears the download cache, and restarts the services.
+category: system
+os_target: win11
+parameters: []
+script: |
+  Stop-Service -Name wuauserv, bits, cryptsvc -Force
+  Remove-Item -Path "$env:SystemRoot\SoftwareDistribution\*" -Recurse -Force -ErrorAction SilentlyContinue
+  Start-Service -Name cryptsvc, bits, wuauserv
+  Write-Output "Windows Update cache cleared and services restarted."

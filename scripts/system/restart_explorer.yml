@@ -1,0 +1,10 @@
+name: Restart Explorer
+description: Kills and relaunches Windows Explorer (fixes unresponsive taskbar/desktop on Windows 11).
+category: system
+os_target: win11
+parameters: []
+script: |
+  Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 1
+  Start-Process explorer
+  Write-Output "Explorer restarted."

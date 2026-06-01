@@ -1,0 +1,14 @@
+name: Start Service
+description: Starts a named Windows service and confirms it is running.
+category: services
+os_target: all
+parameters:
+  - name: service_name
+    label: Service Name
+    type: text
+    required: true
+    placeholder: e.g. Spooler
+script: |
+  Start-Service -Name {{ service_name }} -ErrorAction Stop
+  $svc = Get-Service -Name {{ service_name }}
+  Write-Output "Status: $($svc.Status)"

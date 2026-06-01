@@ -1,0 +1,11 @@
+name: List Running Services
+description: Lists all currently running Windows services sorted by name.
+category: services
+os_target: all
+parameters: []
+script: |
+  Get-Service | Where-Object { $_.Status -eq 'Running' } |
+    Sort-Object DisplayName |
+    Select-Object Name, DisplayName, Status |
+    Format-Table -AutoSize |
+    Out-String

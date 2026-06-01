@@ -1,0 +1,7 @@
+name: List Logged-On Users
+description: Shows all users currently logged on to the machine.
+category: system
+os_target: all
+parameters: []
+script: |
+  query user 2>&1
