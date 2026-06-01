@@ -1,1 +1,35 @@
-<!DOCTYPE html><html><body>{% block content %}{% endblock %}</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WinRM Admin{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <span class="nav-brand">WinRM Admin</span>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">Dashboard</a>
+            <a href="{{ url_for('scripts') }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">Scripts</a>
+            <a href="{{ url_for('history') }}">History</a>
+        </div>
+        {% if vms %}
+        <form class="vm-selector" method="get" action="{{ request.path }}">
+            <select name="vm" onchange="this.form.submit()">
+                <option value="">Select VM...</option>
+                {% for vm in vms %}
+                <option value="{{ vm.name }}"
+                    {% if selected_vm and selected_vm.name == vm.name %}selected{% endif %}>
+                    {{ vm.name }} — {{ vm.ip }} ({{ vm.os_tag }})
+                </option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+    </nav>
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -1,1 +1,37 @@
-{% extends "base.html" %}{% block content %}scripts{% endblock %}
+{% extends "base.html" %}
+{% block title %}Scripts — WinRM Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Script Library</h1>
+    {% if selected_vm %}
+    <span class="filter-label">Showing scripts for {{ selected_vm.os_tag }}</span>
+    {% endif %}
+</div>
+
+{% if not grouped %}
+<div class="empty-state">
+    <p>No scripts available{% if selected_vm %} for {{ selected_vm.os_tag }}{% endif %}. Select a VM to filter by OS.</p>
+</div>
+{% endif %}
+
+{% for category, scripts in grouped.items() %}
+<section class="script-category">
+    <h2 class="category-header">{{ category | title }}</h2>
+    <div class="script-list">
+        {% for script in scripts %}
+        <div class="script-card">
+            <div class="script-info">
+                <h3>{{ script.name }}</h3>
+                <p>{{ script.description }}</p>
+                <span class="os-badge">{{ script.os_target }}</span>
+            </div>
+            <a class="run-btn"
+               href="{{ url_for('run_script', category=script.category, script_name=script.id) }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">
+                Run
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endfor %}
+{% endblock %}

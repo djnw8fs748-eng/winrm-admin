@@ -1,3 +1,52 @@
-{% extends "base.html" %}{% block content %}
-dashboard {% for vm in vms %}{{ vm.name }}{% endfor %}
+{% extends "base.html" %}
+{% block title %}Dashboard — WinRM Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+{% if selected_vm %}
+<div class="vm-status-card">
+    <div class="vm-info">
+        <h2>{{ selected_vm.name }}</h2>
+        <span class="vm-detail">{{ selected_vm.ip }} &bull; {{ selected_vm.os_tag }}</span>
+    </div>
+    <div class="status-badge {% if connected %}status-ok{% else %}status-err{% endif %}">
+        {% if connected %}Connected{% else %}Unreachable{% endif %}
+    </div>
+</div>
+
+<div class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="action-grid">
+        <a class="action-btn" href="{{ url_for('run_script', category='services', script_name='restart_service') }}?vm={{ selected_vm.name }}">
+            Restart Service
+        </a>
+        <a class="action-btn" href="{{ url_for('run_script', category='processes', script_name='kill_process') }}?vm={{ selected_vm.name }}">
+            Kill Process
+        </a>
+        <a class="action-btn" href="{{ url_for('run_script', category='network', script_name='ping_host') }}?vm={{ selected_vm.name }}">
+            Ping Host
+        </a>
+        <a class="action-btn" href="{{ url_for('run_script', category='processes', script_name='list_processes') }}?vm={{ selected_vm.name }}">
+            List Processes
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>Select a VM from the dropdown above to get started.</p>
+</div>
+{% endif %}
+
+<div class="nav-cards">
+    <a class="nav-card" href="{{ url_for('scripts') }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">
+        <h3>Script Library</h3>
+        <p>Browse and run preloaded administrative scripts</p>
+    </a>
+    <a class="nav-card" href="{{ url_for('history') }}">
+        <h3>Run History</h3>
+        <p>View past script executions and their output</p>
+    </a>
+</div>
 {% endblock %}

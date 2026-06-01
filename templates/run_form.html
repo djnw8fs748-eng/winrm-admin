@@ -1,5 +1,64 @@
-{% extends "base.html" %}{% block content %}
-{% for param in script.parameters %}<label>{{ param.label }}</label>{% endfor %}
-{% if error_msg %}<span>{{ error_msg }} required</span>{% endif %}
-{% if output %}<pre>{{ output }}</pre>{% endif %}
+{% extends "base.html" %}
+{% block title %}{{ script.name }} — WinRM Admin{% endblock %}
+{% block content %}
+<div class="page-header">
+    <a class="back-link" href="{{ url_for('scripts') }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">&larr; Scripts</a>
+    <h1>{{ script.name }}</h1>
+    <p class="script-desc">{{ script.description }}</p>
+    <span class="os-badge">{{ script.os_target }}</span>
+</div>
+
+<form class="run-form" method="post"
+      action="{{ url_for('run_script', category=category, script_name=script_name) }}{% if selected_vm %}?vm={{ selected_vm.name }}{% endif %}">
+    <input type="hidden" name="vm" value="{{ selected_vm.name if selected_vm else '' }}">
+
+    <div class="form-section">
+        <h2>Parameters</h2>
+        {% if script.parameters %}
+        {% for param in script.parameters %}
+        <div class="form-group">
+            <label for="{{ param.name }}">
+                {{ param.label }}{% if param.required %} <span class="required-mark">*</span>{% endif %}
+            </label>
+            <input
+                type="{{ param.type if param.type in ['text', 'number'] else 'text' }}"
+                id="{{ param.name }}"
+                name="{{ param.name }}"
+                placeholder="{{ param.placeholder | default('') }}"
+                value="{{ param.default | default('') }}"
+                {% if param.required %}required{% endif %}
+            >
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="no-params">This script has no parameters.</p>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="submit-btn" {% if not selected_vm %}disabled title="Select a VM first"{% endif %}>
+        Run Script
+    </button>
+</form>
+
+{% if error_msg %}
+<div class="output-block output-error">
+    <div class="output-header">
+        <span class="output-label">Error</span>
+        <span class="status-badge status-err">Failed</span>
+    </div>
+    <pre>{{ error_msg }}</pre>
+</div>
+{% endif %}
+
+{% if output %}
+<div class="output-block {% if status == 'success' %}output-success{% else %}output-error{% endif %}">
+    <div class="output-header">
+        <span class="output-label">Output</span>
+        <span class="status-badge {% if status == 'success' %}status-ok{% else %}status-err{% endif %}">
+            {{ status | title }}
+        </span>
+    </div>
+    <pre>{{ output }}</pre>
+</div>
+{% endif %}
 {% endblock %}
