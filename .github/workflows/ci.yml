@@ -111,7 +111,7 @@ jobs:
             -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
             -Name "LocalAccountTokenFilterPolicy" `
             -Value 1 -PropertyType DWORD -Force
-          echo Y | net user winrmtest "WinRMTest@Password123!" /add
+          cmd /c "echo Y| net user winrmtest WinRMTest@Password123! /add"
           net localgroup Administrators winrmtest /add
           Restart-Service WinRM
           Write-Host "WinRM ready on localhost:5985"
