@@ -111,6 +111,13 @@ jobs:
             -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
             -Name "LocalAccountTokenFilterPolicy" `
             -Value 1 -PropertyType DWORD -Force
+          $cfg = "$env:TEMP\secpol.cfg"
+          secedit /export /cfg $cfg /quiet
+          (Get-Content $cfg) `
+            -replace 'PasswordComplexity\s*=\s*1', 'PasswordComplexity = 0' `
+            -replace 'MinimumPasswordLength\s*=\s*\d+', 'MinimumPasswordLength = 0' |
+            Set-Content $cfg
+          secedit /configure /db "$env:TEMP\secedit.sdb" /cfg $cfg /areas SECURITYPOLICY /quiet
           $password = ConvertTo-SecureString "WinRMTest@Password123!" -AsPlainText -Force
           New-LocalUser -Name "winrmtest" -Password $password -PasswordNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "winrmtest"
