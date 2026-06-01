@@ -1,0 +1,5 @@
+{% extends "base.html" %}{% block content %}
+{% for param in script.parameters %}<label>{{ param.label }}</label>{% endfor %}
+{% if error_msg %}<span>{{ error_msg }} required</span>{% endif %}
+{% if output %}<pre>{{ output }}</pre>{% endif %}
+{% endblock %}

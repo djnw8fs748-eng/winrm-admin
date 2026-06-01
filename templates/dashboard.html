@@ -1,0 +1,3 @@
+{% extends "base.html" %}{% block content %}
+dashboard {% for vm in vms %}{{ vm.name }}{% endfor %}
+{% endblock %}
