@@ -111,8 +111,7 @@ jobs:
             -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
             -Name "LocalAccountTokenFilterPolicy" `
             -Value 1 -PropertyType DWORD -Force
-          net accounts /minpwlen:8
-          net user winrmtest "WinRMTest123!" /add
+          net user winrmtest "WinRMTest@Password123!" /add
           net localgroup Administrators winrmtest /add
           Restart-Service WinRM
           Write-Host "WinRM ready on localhost:5985"
@@ -120,7 +119,7 @@ jobs:
       - name: Verify WinRM connectivity before tests
         shell: pwsh
         run: |
-          $password = ConvertTo-SecureString "WinRMTest123!" -AsPlainText -Force
+          $password = ConvertTo-SecureString "WinRMTest@Password123!" -AsPlainText -Force
           $cred = New-Object System.Management.Automation.PSCredential("winrmtest", $password)
           $result = Invoke-Command `
             -ComputerName localhost `
@@ -136,7 +135,7 @@ jobs:
         env:
           VM_HOSTS: "localhost:127.0.0.1:server2019,win11vm:127.0.0.1:win11"
           WINRM_USERNAME: winrmtest
-          WINRM_PASSWORD: "WinRMTest123!"
+          WINRM_PASSWORD: "WinRMTest@Password123!"
           WINRM_PORT: "5985"
           WINRM_TRANSPORT: ntlm
         run: pytest tests/integration/ -v --tb=short
