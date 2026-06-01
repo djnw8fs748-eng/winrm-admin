@@ -111,6 +111,7 @@ jobs:
             -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
             -Name "LocalAccountTokenFilterPolicy" `
             -Value 1 -PropertyType DWORD -Force
+          net accounts /minpwlen:8
           net user winrmtest "WinRMTest123!" /add
           net localgroup Administrators winrmtest /add
           Restart-Service WinRM
