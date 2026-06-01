@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 DB_PATH = os.getenv("DB_PATH", "data/history.db")
 
@@ -33,7 +33,7 @@ def save_run(vm_name, vm_ip, script_id, script_name, parameters, status, stdout,
                (timestamp, vm_name, vm_ip, script_id, script_name, parameters, status, stdout, stderr)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                datetime.utcnow().isoformat(), vm_name, vm_ip,
+                datetime.now(timezone.utc).isoformat(), vm_name, vm_ip,
                 script_id, script_name, json.dumps(parameters),
                 status, stdout, stderr,
             ),
