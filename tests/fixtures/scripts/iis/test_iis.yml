@@ -1,0 +1,7 @@
+name: Test IIS Script
+description: IIS only script
+category: iis
+os_target: server2019
+parameters: []
+script: |
+  Write-Output "IIS only"

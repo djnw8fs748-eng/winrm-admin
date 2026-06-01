@@ -1,0 +1,7 @@
+name: Test Win11 Script
+description: Win11 only script
+category: system
+os_target: win11
+parameters: []
+script: |
+  Write-Output "Win11 only"

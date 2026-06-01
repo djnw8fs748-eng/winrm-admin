@@ -1,0 +1,18 @@
+name: Test Service Script
+description: A script for testing
+category: services
+os_target: all
+parameters:
+  - name: service_name
+    label: Service Name
+    type: text
+    required: true
+    placeholder: e.g. Spooler
+  - name: timeout
+    label: Timeout
+    type: number
+    required: false
+    default: 30
+script: |
+  Get-Service -Name {{ service_name }}
+  Start-Sleep -Seconds {{ timeout }}
