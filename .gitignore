@@ -2,5 +2,11 @@
 data/history.db
 __pycache__/
 *.pyc
+*.pyo
 .pytest_cache/
 .venv/
+.DS_Store
+.coverage
+htmlcov/
+*.log
+instance/
