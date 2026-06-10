@@ -1,0 +1,10 @@
+name: Get Firewall Profiles
+description: Shows enabled/disabled status and default actions for Domain, Private, and Public firewall profiles.
+category: firewall
+os_target: all
+parameters: []
+script: |
+  Get-NetFirewallProfile |
+    Select-Object Name, Enabled, DefaultInboundAction, DefaultOutboundAction |
+    Format-Table -AutoSize |
+    Out-String

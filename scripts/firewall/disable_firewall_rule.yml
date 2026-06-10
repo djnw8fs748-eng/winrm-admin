@@ -1,0 +1,15 @@
+name: Disable Firewall Rule
+description: Disables a firewall rule by its display name.
+category: firewall
+os_target: all
+parameters:
+  - name: rule_name
+    label: Rule Display Name
+    type: text
+    required: true
+    placeholder: e.g. Remote Desktop - User Mode (TCP-In)
+script: |
+  Disable-NetFirewallRule -DisplayName {{ rule_name }} -ErrorAction Stop
+  $rule = Get-NetFirewallRule -DisplayName {{ rule_name }} -ErrorAction SilentlyContinue
+  Write-Output "Rule: $($rule.DisplayName)"
+  Write-Output "Enabled: $($rule.Enabled)"
