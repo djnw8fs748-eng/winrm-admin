@@ -1,0 +1,10 @@
+name: Trigger Update Check
+description: Forces Windows to check for new updates immediately.
+category: windows_update
+os_target: all
+parameters: []
+script: |
+  Write-Output "Triggering Windows Update scan..."
+  wuauclt /detectnow
+  UsoClient StartScan 2>$null
+  Write-Output "Scan triggered. Allow a few minutes then recheck update status."

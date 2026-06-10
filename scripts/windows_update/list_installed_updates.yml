@@ -1,0 +1,16 @@
+name: List Installed Updates
+description: Lists recently installed Windows updates (hotfixes). Sorted newest first.
+category: windows_update
+os_target: all
+parameters:
+  - name: count
+    label: Number of Updates
+    type: number
+    required: false
+    default: 20
+script: |
+  Get-HotFix |
+    Sort-Object InstalledOn -Descending -ErrorAction SilentlyContinue |
+    Select-Object -First {{ count }} HotFixID, InstalledOn, Description, InstalledBy |
+    Format-Table -AutoSize |
+    Out-String
