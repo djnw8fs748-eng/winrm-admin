@@ -1,0 +1,24 @@
+name: Get Registry Value
+description: Reads a single value from a registry key.
+category: registry
+os_target: all
+parameters:
+  - name: hive
+    label: Hive
+    type: text
+    required: true
+    placeholder: "HKLM or HKCU"
+  - name: key_path
+    label: Key Path
+    type: text
+    required: true
+    placeholder: "e.g. SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+  - name: value_name
+    label: Value Name
+    type: text
+    required: true
+    placeholder: "e.g. ProductName"
+script: |
+  $path = {{ hive }} + ":\" + {{ key_path }}
+  $props = Get-ItemProperty -Path $path -Name {{ value_name }} -ErrorAction Stop
+  Write-Output "{{ value_name }}: $($props.{{ value_name }})"
