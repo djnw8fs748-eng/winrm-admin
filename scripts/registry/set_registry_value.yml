@@ -31,6 +31,7 @@ parameters:
     placeholder: "String, DWORD, QWord, Binary"
 script: |
   $path = {{ hive }} + ":\" + {{ key_path }}
-  Set-ItemProperty -Path $path -Name {{ value_name }} -Value {{ value_data }} -Type {{ value_type }} -ErrorAction Stop
-  $check = Get-ItemProperty -Path $path -Name {{ value_name }} -ErrorAction SilentlyContinue
-  Write-Output "Set {{ value_name }} = $($check.{{ value_name }})"
+  $valueName = {{ value_name }}
+  Set-ItemProperty -Path $path -Name $valueName -Value {{ value_data }} -Type {{ value_type }} -ErrorAction Stop
+  $check = Get-ItemProperty -Path $path -Name $valueName -ErrorAction SilentlyContinue
+  Write-Output "Set $valueName = $($check.$valueName)"

@@ -20,5 +20,6 @@ parameters:
     placeholder: "e.g. ProductName"
 script: |
   $path = {{ hive }} + ":\" + {{ key_path }}
-  $props = Get-ItemProperty -Path $path -Name {{ value_name }} -ErrorAction Stop
-  Write-Output "{{ value_name }}: $($props.{{ value_name }})"
+  $valueName = {{ value_name }}
+  $props = Get-ItemProperty -Path $path -Name $valueName -ErrorAction Stop
+  Write-Output "$valueName`: $($props.$valueName)"
