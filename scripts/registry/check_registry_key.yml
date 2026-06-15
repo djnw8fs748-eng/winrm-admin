@@ -1,0 +1,22 @@
+name: Check Registry Key
+description: Tests whether a registry key path exists.
+category: registry
+os_target: all
+parameters:
+  - name: hive
+    label: Hive
+    type: text
+    required: true
+    placeholder: "HKLM or HKCU"
+  - name: key_path
+    label: Key Path
+    type: text
+    required: true
+    placeholder: "e.g. SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+script: |
+  $path = {{ hive }} + ":\" + {{ key_path }}
+  if (Test-Path $path) {
+    Write-Output "EXISTS: $path"
+  } else {
+    Write-Output "NOT FOUND: $path"
+  }

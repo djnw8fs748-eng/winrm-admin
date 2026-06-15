@@ -1,0 +1,24 @@
+name: Run Scheduled Task
+description: Triggers a scheduled task to run immediately, regardless of its schedule.
+category: scheduled_tasks
+os_target: all
+parameters:
+  - name: task_name
+    label: Task Name
+    type: text
+    required: true
+    placeholder: e.g. Defrag
+  - name: folder
+    label: Task Folder
+    type: text
+    required: false
+    default: "\\"
+    placeholder: "e.g. \\ for root"
+script: |
+  Start-ScheduledTask -TaskName {{ task_name }} -TaskPath {{ folder }} -ErrorAction Stop
+  Start-Sleep -Seconds 2
+  $task = Get-ScheduledTask -TaskName {{ task_name }} -TaskPath {{ folder }} -ErrorAction SilentlyContinue
+  if ($task) {
+    Write-Output "Task: $($task.TaskName)"
+    Write-Output "State: $($task.State)"
+  }

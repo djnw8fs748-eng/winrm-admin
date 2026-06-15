@@ -123,18 +123,26 @@ jobs:
           New-LocalUser -Name "winrmtest" -Password $password -PasswordNeverExpires
           Add-LocalGroupMember -Group "Administrators" -Member "winrmtest"
           Restart-Service WinRM
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 10
           Write-Host "WinRM ready on localhost:5985"
 
       - name: Verify WinRM connectivity before tests
         run: |
           python -c "
-          import winrm
-          s = winrm.Session('http://127.0.0.1:5985/wsman', auth=('winrmtest', 'WinRMTest@Password123!'), transport='ntlm')
-          r = s.run_ps('Write-Output ok')
-          out = r.std_out.decode().strip()
-          assert out == 'ok', f'Expected ok, got: {out!r}'
-          print('WinRM connectivity verified')
+          import winrm, time
+          for attempt in range(10):
+              try:
+                  s = winrm.Session('http://127.0.0.1:5985/wsman', auth=('winrmtest', 'WinRMTest@Password123!'), transport='ntlm')
+                  r = s.run_ps('Write-Output ok')
+                  out = r.std_out.decode().strip()
+                  assert out == 'ok', f'Expected ok, got: {out!r}'
+                  print('WinRM connectivity verified')
+                  break
+              except Exception as e:
+                  if attempt == 9:
+                      raise
+                  print(f'Attempt {attempt + 1} failed: {e}. Retrying in 5s...')
+                  time.sleep(5)
           "
 
       - name: Run integration tests

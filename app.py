@@ -97,7 +97,8 @@ def history():
     vm_filter = request.args.get("vm")
     category_filter = request.args.get("category")
     runs = get_runs(vm_name=vm_filter, category=category_filter)
-    categories = ["services", "iis", "processes", "network", "system"]
+    categories = ["services", "iis", "processes", "network", "system",
+                  "windows_update", "firewall", "scheduled_tasks", "registry"]
     return render_template(
         "history.html",
         vms=config.vms,

@@ -1,0 +1,37 @@
+name: Set Registry Value
+description: Writes a value to a registry key. The key must already exist.
+category: registry
+os_target: all
+parameters:
+  - name: hive
+    label: Hive
+    type: text
+    required: true
+    placeholder: "HKLM or HKCU"
+  - name: key_path
+    label: Key Path
+    type: text
+    required: true
+    placeholder: "e.g. SOFTWARE\\MyApp\\Settings"
+  - name: value_name
+    label: Value Name
+    type: text
+    required: true
+    placeholder: "e.g. EnableFeature"
+  - name: value_data
+    label: Value Data
+    type: text
+    required: true
+    placeholder: "e.g. 1"
+  - name: value_type
+    label: Value Type
+    type: text
+    required: false
+    default: "String"
+    placeholder: "String, DWORD, QWord, Binary"
+script: |
+  $path = {{ hive }} + ":\" + {{ key_path }}
+  $valueName = {{ value_name }}
+  Set-ItemProperty -Path $path -Name $valueName -Value {{ value_data }} -Type {{ value_type }} -ErrorAction Stop
+  $check = Get-ItemProperty -Path $path -Name $valueName -ErrorAction SilentlyContinue
+  Write-Output "Set $valueName = $($check.$valueName)"

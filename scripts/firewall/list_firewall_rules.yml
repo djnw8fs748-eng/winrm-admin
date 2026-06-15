@@ -1,0 +1,18 @@
+name: List Firewall Rules
+description: Lists enabled firewall rules, optionally filtered by display name. Use * to list all.
+category: firewall
+os_target: all
+parameters:
+  - name: name_filter
+    label: Name Filter
+    type: text
+    required: false
+    default: "*"
+    placeholder: e.g. Remote (leave blank for all)
+script: |
+  Get-NetFirewallRule -Enabled True |
+    Where-Object { $_.DisplayName -like {{ name_filter }} } |
+    Select-Object DisplayName, Direction, Action, Profile |
+    Sort-Object Direction, DisplayName |
+    Format-Table -AutoSize |
+    Out-String

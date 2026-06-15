@@ -1,0 +1,14 @@
+name: Check Windows Update Status
+description: Lists pending (not yet installed) Windows updates.
+category: windows_update
+os_target: all
+parameters: []
+script: |
+  try {
+    $searcher = (New-Object -ComObject Microsoft.Update.Session).CreateUpdateSearcher()
+    $result = $searcher.Search("IsInstalled=0 and IsHidden=0")
+    Write-Output "Pending updates: $($result.Updates.Count)"
+    $result.Updates | ForEach-Object { Write-Output "  - $($_.Title)" }
+  } catch {
+    Write-Output "Could not query Windows Update: $_"
+  }

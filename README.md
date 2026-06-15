@@ -19,6 +19,10 @@ A self-hosted Docker web app for running PowerShell scripts on remote Windows vi
 | Processes | Kill by name, Kill and relaunch, List |
 | Network | Ping, Port check, Flush DNS, Adapter info |
 | System | Event log errors, Logged-on users, Disk space, Restart Explorer (Win11), Clear WU cache (Win11) |
+| Windows Update | Check pending updates, List installed hotfixes, Trigger update scan |
+| Firewall | Get profile status, List rules, Enable rule, Disable rule |
+| Scheduled Tasks | List tasks, Run task, Enable task, Disable task |
+| Registry | Check key exists, Get value, Set value |
 
 ## Requirements
 
@@ -54,6 +58,74 @@ docker compose up --build
 ```
 
 Open `http://localhost:5000` in your browser.
+
+## Deployment
+
+### First-time setup
+
+```bash
+git clone https://github.com/djnw8fs748-eng/winrm-admin.git
+cd winrm-admin
+cp .env.example .env
+```
+
+Edit `.env` with your VM details (see Quick Start above), then build and start:
+
+```bash
+docker compose up --build -d
+```
+
+The `-d` flag runs the container in the background. The app starts at `http://localhost:5000`.
+
+### Run history persistence
+
+Run history is stored in `data/history.db` on the Docker host (mounted as a volume). This file survives container restarts and rebuilds — do not delete it unless you want to clear the history.
+
+### Updating to a new version
+
+```bash
+git pull
+docker compose up --build -d
+```
+
+The build step picks up any code or script changes. The `data/` volume is untouched.
+
+### Stopping and starting
+
+```bash
+docker compose stop        # stop the container, keep the image
+docker compose start       # start it again
+docker compose down        # stop and remove the container (data volume preserved)
+```
+
+### Viewing logs
+
+```bash
+docker compose logs -f
+```
+
+### Changing VM configuration
+
+Edit `.env`, then restart the container:
+
+```bash
+docker compose restart
+```
+
+No rebuild is needed for `.env` changes — environment variables are loaded at startup.
+
+### Running on a non-default port
+
+To expose the app on a different host port (e.g. 8080), edit `docker-compose.yml`:
+
+```yaml
+ports:
+  - "8080:5000"
+```
+
+Then run `docker compose up -d` (no rebuild needed for port changes).
+
+---
 
 ## Enabling WinRM on Target VMs
 
